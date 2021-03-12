@@ -17,6 +17,12 @@ router.post('/registro-usuario', (req, res) => {
         contrasenia: usuario.contrasenia,
         estado: 'Activo'
     });
+    usuario.listas.forEach(lista => {
+        nuevo_usuario.listas.push(lista._id);
+    });
+    usuario.canciones_favoritas.forEach(cancion_fav => {
+        nuevo_usuario.canciones_favoritas.push(cancion_fav._id);
+    });
     nuevo_usuario.save((err, usuario_db) => {
         if (err) {
             //Error a nivel de la base de datos
@@ -36,22 +42,30 @@ router.post('/registro-usuario', (req, res) => {
 });
 
 router.get('/listar-usuarios', (req, res) => {
-    Usuario.find((err, lista_usuarios) => {
-        if (err) {
-            //Error a nivel de la base de datos
-            res.json({
-                resultado: false,
-                msj: 'No se pudieron registrar los usuarios',
-                err
-            })
-        } else {
-            res.json({
-                resultado: true,
-                msj: 'Los usuarios se listaron existosamente',
-                lista_usuarios
-            })
-        }
-    });
+    Usuario.find().populate([{
+            path: 'listas',
+            populate: {
+                path: 'lista_canciones',
+                model: 'Cancion',
+                populate: {
+                    path: 'artistas',
+                    model: 'Artista'
+                }
+            },
+
+        }])
+        .exec((err, lista) => {
+            if (err) {
+                res.json({
+                    msj: 'Los usuarios no se pudieron listar',
+                    err
+                });
+            } else {
+                res.json({
+                    lista
+                });
+            }
+        });
 });
 
 router.post('/validar-credenciales', (req, res) => {
@@ -98,7 +112,6 @@ router.get('/buscar-usuario-id', (req, res) => {
         }
     });
 });
-
 router.put('/modificar-usuario', (req, res) => {
     let usuario = JSON.parse(req.body.usuario_modificado)
     Usuario.updateOne({ _id: usuario._id }, {
@@ -111,6 +124,8 @@ router.put('/modificar-usuario', (req, res) => {
             genero: usuario.genero,
             tipo: usuario.tipo,
             contrasenia: usuario.contrasenia,
+            listas: usuario.listas,
+            canciones_favoritas: usuario.canciones_favoritas,
             estado: usuario.estado
         }
     }, (err, usuario_modi) => {
@@ -166,6 +181,66 @@ router.put('/estado-usuario', (req, res) => {
             }
         }
     })
+})
+
+router.put('/eliminar-lista-usuario', (req, res) => {
+    let lista_eliminar = JSON.parse(req.body.lista);
+    Usuario.findById(req.body._id, (err, usuario) => {
+        if (err) {
+            res.json({
+                'msj': 'La lista no se encontró',
+                err
+            });
+        } else {
+
+            usuario.listas.pull(lista_eliminar);
+
+            usuario.save((err, usuario) => {
+                if (err) {
+                    res.json({
+                        'msj': 'La lista no se pudo registrar',
+                        err
+                    });
+                } else {
+                    res.json({
+                        'msj': 'La lista se registró correctamente',
+                        usuario
+                    });
+                }
+            })
+        }
+    })
+
+})
+
+router.put('/eliminar-cancion-favorita', (req, res) => {
+    let cancion_fav_eliminar = JSON.parse(req.body.cancion);
+    Usuario.findById(req.body._id, (err, usuario) => {
+        if (err) {
+            res.json({
+                'msj': 'La canción favorita no se encontró',
+                err
+            });
+        } else {
+
+            usuario.canciones_favoritas.pull(cancion_fav_eliminar);
+
+            usuario.save((err, usuario) => {
+                if (err) {
+                    res.json({
+                        'msj': 'La canción no se pudo registrar',
+                        err
+                    });
+                } else {
+                    res.json({
+                        'msj': 'La canción se registró correctamente',
+                        usuario
+                    });
+                }
+            })
+        }
+    })
+
 })
 
 module.exports = router;

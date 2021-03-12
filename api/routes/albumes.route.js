@@ -12,8 +12,13 @@ router.post('/registro-albumes', (req, res) => {
         fecha_lanzamiento: album.fecha_lanzamiento,
         cantidad_canciones: album.cantidad_canciones,
         duracion: album.duracion,
-        canciones: [],
         estado: 'Activo'
+    });
+    album.artista.forEach(artista => {
+        nuevo_album.artista.push(artista._id);
+    });
+    album.canciones.forEach(cancion => {
+        nuevo_album.canciones.push(cancion._id);
     });
     nuevo_album.save((err, album_db) => {
         if (err) {
@@ -34,20 +39,16 @@ router.post('/registro-albumes', (req, res) => {
 });
 
 router.get('/listar-albumes', (req, res) => {
-    Album.find((err, lista_albumes) => {
+    Album.find().populate(['artista', 'canciones']).exec((err, lista) => {
         if (err) {
-            //Error a nivel de la base de datos
             res.json({
-                resultado: false,
-                msj: 'No se pudieron obtener los álbumes',
+                msj: 'Los álbumes no se pudieron listar',
                 err
-            })
+            });
         } else {
             res.json({
-                resultado: true,
-                msj: 'Los álbumes  se listaron existosamente',
-                lista_albumes
-            })
+                lista
+            });
         }
     });
 });
@@ -81,6 +82,7 @@ router.put('/modificar-album', (req, res) => {
             fecha_lanzamiento: album.fecha_lanzamiento,
             cantidad_canciones: album.cantidad_canciones,
             duracion: album.duracion,
+            artista: album.artista,
             canciones: album.canciones,
             estado: album.estado
         }

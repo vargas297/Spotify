@@ -55,3 +55,4 @@ app.use('/api', require('./routes/usuarios.route'));
 app.use('/api', require('./routes/canciones.route'));
 app.use('/api', require('./routes/artista.route'));
 app.use('/api', require('./routes/albumes.route'));
+app.use('/api', require('./routes/listas.route'));

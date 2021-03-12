@@ -33,20 +33,18 @@ router.post('/registro-artistas', (req, res) => {
 });
 
 router.get('/listar-artistas', (req, res) => {
-    Artista.find((err, lista_artistas) => {
+    Artista.find().exec((err, lista) => {
         if (err) {
-            //Error a nivel de la base de datos
             res.json({
-                resultado: false,
-                msj: 'No se pudieron listar los artistas',
+                msj: 'Las canciones no se pudieron listar',
                 err
-            })
+            });
         } else {
+
             res.json({
-                resultado: true,
-                msj: 'Los artistas se listaron existosamente',
-                lista_artistas
-            })
+                msj: 'Las canciones se listaron existosamente',
+                lista
+            });
         }
     });
 });

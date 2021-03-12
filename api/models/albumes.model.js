@@ -6,7 +6,14 @@ const schema_registro_albumes = new mongoose.Schema({
     'fecha_lanzamiento': { type: Date, required: true, unique: false },
     'cantidad_canciones': { type: Number, required: true, unique: false },
     'duracion': { type: String, required: true, unique: false },
-    'canciones': { type: Array, required: true, unique: false },
+    'artista': [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Artista'
+    }],
+    'canciones': [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cancion'
+    }],
     'estado': { type: String, required: true, unique: false }
 });
 

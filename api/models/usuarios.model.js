@@ -9,6 +9,14 @@ const schema_registro_usuarios = new mongoose.Schema({
     'genero': { type: String, required: false, unique: false },
     'tipo': { type: String, required: true, unique: false },
     'contrasenia': { type: String, required: true, unique: false },
+    'listas': [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lista'
+    }],
+    'canciones_favoritas': [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cancion'
+    }],
     'estado': { type: String, required: true, unique: false }
 });
 

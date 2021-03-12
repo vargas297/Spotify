@@ -10,9 +10,10 @@ router.post('/registro-canciones', (req, res) => {
     let nueva_cancion = new Cancion({
         nombre: cancion.nombre,
         duracion: cancion.duracion,
-        artista: '',
-        album: '',
         estado: 'Activo'
+    });
+    cancion.artista.forEach(art => {
+        nueva_cancion.artistas.push(art._id);
     });
     nueva_cancion.save((err, cancion_db) => {
         if (err) {
@@ -33,22 +34,21 @@ router.post('/registro-canciones', (req, res) => {
 });
 
 router.get('/listar-canciones', (req, res) => {
-    Cancion.find((err, lista_canciones) => {
+    Cancion.find().populate({ path: 'artistas' }).exec((err, lista_canciones) => {
         if (err) {
-            //Error a nivel de la base de datos
             res.json({
-                resultado: false,
-                msj: 'No se pudieron registrar las canciones',
+                msj: 'Las canciones no se pudieron listar',
                 err
-            })
+            });
         } else {
+
             res.json({
-                resultado: true,
                 msj: 'Las canciones se listaron existosamente',
                 lista_canciones
-            })
+            });
         }
     });
+
 });
 router.get('/buscar-cancion-id', (req, res) => {
     Cancion.findOne({ _id: req.query._id }, (err, cancion) => {
